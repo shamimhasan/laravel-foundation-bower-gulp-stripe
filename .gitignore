@@ -1,0 +1,20 @@
+# Laravel
+/vendor
+composer.phar
+.env.*
+/bootstrap/compiled.php
+/public/assets
+
+# Packages
+/node_modules
+/bower_components
+
+# ide / editor
+.tags
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+Icon?
+.cache

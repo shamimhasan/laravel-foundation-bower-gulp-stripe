@@ -1,0 +1,71 @@
+@charset 'UTF-8';
+@import url('http://fonts.googleapis.com/css?family=Droid+Sans:400,700');
+@import 'vendor/foundation_settings';
+
+.chart-wrapper {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+.chart-wrapper .chart-title {
+  border-bottom: 1px solid #d7d7d7;
+  color: #555;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 10px 10px 8px;
+}
+
+.chart-wrapper .chart-stage {
+  min-height: 290px;
+  padding: 5px 10px;
+}
+
+.chart-wrapper .chart-notes {
+  background: #fbfbfb;
+  border-top: 1px solid #e2e2e2;
+  color: #808080;
+  font-size: 12px;
+  padding: 8px 10px 5px;
+}
+
+.container {
+  max-width  : 740px;
+  box-shadow : 0px 2px 5px rgba(0, 0, 0, 0.25);
+  background : #fff;
+  margin     : 0 auto;
+}
+
+p {
+  color : #999;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family    : 'Droid Sans', sans-serif;
+  font-weight    : 700;
+  text-transform : uppercase;
+}
+
+h1 {
+  margin : 20px 0 0;
+}
+
+.page-header {
+  margin-top: 1rem;
+}
+
+.title-area h1, .title-area .fi-clock {
+  margin-left: 0px;
+  color: #fff;
+}
+
+h4.subhead {
+  font-weight   : lighter;
+  color         : #777;
+  margin-bottom : 20px;
+}
+
+.columns .row {
+  margin-top : 1em;
+}
