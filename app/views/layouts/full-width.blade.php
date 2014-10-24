@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="assets/css/vendor.min.css" />
     <link rel="stylesheet" href="assets/css/app.min.css" />
+    <link rel="stylesheet" href="assets/css/custom.css" />
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
@@ -32,7 +33,7 @@
                             <label>Section Name</label>
                         </li>
                         <li>
-                            <a class="" href="#">Dropdown Level 1</a>
+                            <a class="" href="{{ URL::to('/connect') }}">Connect</a>
                         </li>
                         <li>
                             <a href="#">Dropdown Option</a>

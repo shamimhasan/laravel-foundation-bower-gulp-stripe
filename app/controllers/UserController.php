@@ -32,7 +32,7 @@ class UserController extends BaseController {
 
             $respCode = curl_getinfo($req, CURLINFO_HTTP_CODE);
             $data = curl_exec($req);
-            
+
             $resp = json_decode(curl_exec($req), true);
             curl_close($req);
 
@@ -40,11 +40,17 @@ class UserController extends BaseController {
 
             echo $resp['access_token'];
             die();
+            $customer = Stripe_Customer::create(array(
+                        "card" => $resp['access_token'],
+                        "description" => "payinguser@example.com")
+            );
         } else {
             return View::make('user.connect')
                             ->withClientid(getenv('stripe.client.id'));
         }
     }
+
+    /* CHARGE USER */
 
     public function getCharge() {
 
@@ -88,6 +94,53 @@ class UserController extends BaseController {
         }
     }
 
+    public function getConnectCharge() {
+
+        return View::make('user.connectcharge')
+                        ->withStripekey(getenv('stripe.public.key'));
+    }
+
+    public function postConnectCharge() {
+        Stripe::setApiKey(getenv('stripe.secret.key'));
+
+        $stripeToken = Input::get('stripeToken');
+        $stripeEmail = Input::get('stripeEmail');
+        $user_connect_token = "";
+
+        $charge = Stripe_Charge::create(array(
+                    "amount" => 1000,
+                    "currency" => "usd",
+                    "card" => $stripeToken,
+                    "description" => $stripeEmail,
+                    "application_fee" => 123
+                        ), $user_connect_token
+        );
+    }
+
+    public function getConnectSubscription() {
+
+        return View::make('user.connectsubscription')
+                        ->withStripekey(getenv('stripe.public.key'));
+    }
+
+    public function postConnectSubscription() {
+        Stripe::setApiKey(getenv('stripe.secret.key'));
+
+        $stripeToken = Input::get('stripeToken');
+        $stripeEmail = Input::get('stripeEmail');
+        $user_connect_token = "";
+
+        $Stripecustomer = Stripe_Customer::create(array(
+                    "card" => $stripeToken,
+                    "description" => $stripeEmail,
+                    "email" => $stripeEmail)
+        );
+        $Stripecustomer->update_subscription(array(
+            "application_fee_percent" => 20
+                ), $user_connect_token
+        );
+    }
+
     public function getPaymentsuccess() {
         return View::make('user.success');
     }
@@ -100,6 +153,16 @@ class UserController extends BaseController {
         $customers = Stripe_Customer::all();
         return View::make('user.customers')
                         ->withCustomers($customers);
+    }
+
+    public function getApplicationfees() {
+//        Customer::findOrFail(1);
+//        die();
+
+        Stripe::setApiKey(getenv('stripe.secret.key'));
+        $fees = Stripe_ApplicationFee::all();
+        return View::make('user.applicationfees')
+                        ->withFees($fees);
     }
 
 }

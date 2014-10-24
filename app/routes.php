@@ -18,6 +18,14 @@ Route::post('user', 'UserController@postIndex');
 Route::get('connect', 'UserController@getConnect');
 Route::get('connectdone', 'UserController@getConnectdone');
 
+Route::get('connect-charge', 'UserController@getConnectCharge');
+Route::post('connect-charge', 'UserController@postConnectCharge');
+
+Route::get('connect-subscription', 'UserController@getConnectSubscription');
+Route::post('connect-subscription', 'UserController@postConnectSubscription');
+
+Route::get('connect-applicationfees', 'UserController@getApplicationfee');
+
 Route::get('charge', 'UserController@getCharge');
 Route::post('charge', 'UserController@postCharge');
 
