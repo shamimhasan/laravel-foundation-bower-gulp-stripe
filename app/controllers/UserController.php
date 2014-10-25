@@ -9,45 +9,44 @@
 class UserController extends BaseController {
 
     public function getIndex() {
-
         return View::make('user.index')
                         ->withClientid(getenv('stripe.client.id'));
     }
 
     public function getConnect() {
+        $stripe = OAuth::consumer('Stripe');
         if (Input::has('code')) {
             $accessCode = Input::get('code');
 
-            $token_request_body = array(
-                'grant_type' => 'authorization_code',
-                'client_id' => getenv('stripe.client.id'),
-                'code' => $accessCode,
-                'client_secret' => getenv('stripe.secret.key')
-            );
+            $token = $stripe->requestAccessToken($accessCode);
+            $customer_data = $token->getExtraParams();
 
-            $req = curl_init('https://connect.stripe.com/oauth/token');
-            curl_setopt($req, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($req, CURLOPT_POST, true);
-            curl_setopt($req, CURLOPT_POSTFIELDS, http_build_query($token_request_body));
 
-            $respCode = curl_getinfo($req, CURLINFO_HTTP_CODE);
-            $data = curl_exec($req);
-
-            $resp = json_decode(curl_exec($req), true);
-            curl_close($req);
-
-            print_r($data);
-
-            echo $resp['access_token'];
-            die();
-            $customer = Stripe_Customer::create(array(
-                        "card" => $resp['access_token'],
-                        "description" => "payinguser@example.com")
-            );
+            $customer = Customer::firstOrCreate(array('stripe_user_id' => $customer_data['stripe_user_id']));
+            $customer->stripe_user_id = $customer_data['stripe_user_id'];
+            $customer->access_token = $token->getAccessToken();
+            $customer->refresh_token = $customer_data['refresh_token'];
+            $customer->livemode = $customer_data['livemode'];
+            $customer->stripe_publishable_key = $customer_data['stripe_publishable_key'];
+            $customer->token_type = $customer_data['token_type'];
+            $customer->save();
+//            Session::flash('success', 'Access Granted');
+            return Redirect::to('success');
+        } else if (Input::has('error')) {
+            return View::make('user.connect')
+                            ->withClientid(getenv('stripe.client.id'))->withError(Input::get('error_description'));
         } else {
             return View::make('user.connect')
                             ->withClientid(getenv('stripe.client.id'));
         }
+    }
+
+    public function getConnectuser() {
+        Stripe::setApiKey("sk_test_QpfZA8vWoMso7BrsToa4DZNm");
+        $customer = Stripe_Customer::all();
+        echo '<pre>';
+        print_r($customer);
+        die();
     }
 
     /* CHARGE USER */
@@ -74,16 +73,13 @@ class UserController extends BaseController {
 
             //CHARGE CUSTOMER
             Stripe_Charge::create(array(
-                "amount" => 1000, # amount in cents, again
+                "amount" => 2000, # amount in cents, again
                 "currency" => "usd",
                 "customer" => $Stripecustomer->id)
             );
 
             // SAVE CUSTOMER TO DATABASE
-            $customer = new Customer;
-            $customer->email = $stripeEmail;
-            $customer->customer_id = $Stripecustomer->id;
-            $customer->save();
+
 
             Session::flash('message', "Payment Successful");
             return Redirect::to('success-pay');
@@ -141,11 +137,52 @@ class UserController extends BaseController {
         );
     }
 
-    public function getPaymentsuccess() {
+    public function getSuccess() {
         return View::make('user.success');
     }
 
     public function getStripecustomer() {
+        $customers = Customer::all();
+        return View::make('user.customers')
+                        ->withCustomers($customers);
+    }
+
+    public function getAlluser($id) {
+
+        $customer = Customer::find($id);
+        $user_access_token = $customer->access_token;
+        Stripe::setApiKey($user_access_token);
+        $users = Stripe_Customer::all();
+        foreach ($users->data as $user) {
+            $suser = User::firstOrCreate(array('user_id' => $user->id));
+            $suser->customer_id = $id;
+            $suser->description = $user->description;
+            $suser->email = $user->email;
+            $cards = array();
+            foreach ($user->cards->data as $card) {
+                $cards[] = array(
+                    'id' => $card->id,
+                    'last4' => $card->last4,
+                    'brand' => $card->brand,
+                    'exp_month' => $card->exp_month,
+                    'exp_year' => $card->exp_year
+                );
+            }
+            $suser->cards = json_encode($cards);
+            $suser->default_card = $user->default_card;
+            $suser->save();
+        }
+        return Redirect::to('listuser/' . $id);
+    }
+
+    public function getListuser($id) {
+        $users = User::where('customer_id', '=', $id)->get();
+        return View::make('user.listuser')
+                        ->withUsers($users)
+                        ->withCustomer($id);
+    }
+
+    public function getStripeusercustomer() {
 //        Customer::findOrFail(1);
 //        die();
 
