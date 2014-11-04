@@ -42,7 +42,7 @@ class UserController extends BaseController {
     }
 
     public function getConnectuser() {
-        Stripe::setApiKey("sk_test_QpfZA8vWoMso7BrsToa4DZNm");
+        Stripe::setApiKey(getenv('stripe.secret.key'));
         $customer = Stripe_Customer::all();
         echo '<pre>';
         print_r($customer);
